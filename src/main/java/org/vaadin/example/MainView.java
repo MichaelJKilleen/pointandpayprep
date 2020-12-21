@@ -3,6 +3,7 @@ package org.vaadin.example;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -58,27 +59,17 @@ public class MainView extends VerticalLayout {
     private Div mainBody() {
         Div view = new Div();
 
-        // Use TextField for standard text input
-        TextField textField = new TextField("Your name");
-        textField.addThemeName("bordered");
-
-        // Button click listeners can be defined as lambda expressions
-        GreetService greetService = new GreetService();
-        Button button = new Button("Say hello", e -> Notification.show(greetService.greet(textField.getValue())));
-
-        // Theme variants give you predefined extra styles for components.
-        // Example: Primary button is more prominent look.
-        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        // You can specify keyboard shortcuts for buttons.
-        // Example: Pressing enter in this view clicks the Button.
-        button.addClickShortcut(Key.ENTER);
-
         // Use custom CSS classes to apply styling. This is defined in
         // shared-styles.css.
         view.addClassName("centered-content");
 
-        view.add(textField, button);
+        ComboBox<String> productLinesCB = new ComboBox<>();
+        productLinesCB.setItems("Classic Cars", "Motorcycles", "Planes", "Ships", "Trains", "Trucks and Buses",
+                "Vintage Cars");
+        productLinesCB.setLabel("Product Lines");
+        productLinesCB.addValueChangeListener(l -> Notification.show(l.getValue()));
+
+        view.add(productLinesCB);
 
         return view;
     }
@@ -94,6 +85,24 @@ public class MainView extends VerticalLayout {
         h3.addClassName("centered-header-content");
         div.add(h3);
         return div;
+    }
+
+    private void hold() {
+        // Use TextField for standard text input
+        TextField textField = new TextField("Your name");
+        textField.addThemeName("bordered");
+
+        // Button click listeners can be defined as lambda expressions
+        GreetService greetService = new GreetService();
+        Button button = new Button("Say hello", e -> Notification.show(greetService.greet(textField.getValue())));
+
+        // Theme variants give you predefined extra styles for components.
+        // Example: Primary button is more prominent look.
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        // You can specify keyboard shortcuts for buttons.
+        // Example: Pressing enter in this view clicks the Button.
+        button.addClickShortcut(Key.ENTER);
     }
 
 }
