@@ -1,6 +1,6 @@
-package org.vaadin.example;
+package org.vaadin.example.service;
 
-public class GreetService {
+public class GreetServiceImpl implements GreetService {
 
     public String greet(String name) {
         if (name == null || name.isEmpty()) {

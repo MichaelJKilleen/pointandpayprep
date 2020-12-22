@@ -112,6 +112,14 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.vaadin/guice-vaadin -->
+        <dependency>
+            <groupId>com.vaadin.addon</groupId>
+            <artifactId>flow-guice-addon</artifactId>
+            <version>2020.1-vaadin14</version>
+         </dependency>
+
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
