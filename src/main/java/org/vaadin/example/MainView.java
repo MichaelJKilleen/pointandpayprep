@@ -1,16 +1,18 @@
 package org.vaadin.example;
 
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -18,13 +20,17 @@ import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
+import org.vaadin.example.models.Product;
+import org.vaadin.example.models.ProductLineDetail;
 import org.vaadin.example.service.GreetService;
 import org.vaadin.example.service.HelloWorldService;
+import org.vaadin.example.service.persist.ProductLineService;
+import org.vaadin.example.service.persist.ProductService;
 
 /**
  * The main view contains a button and a click listener.
  */
-@Route("")
+@Route(value = "pos")
 @Theme(value = Lumo.class)
 @PWA(name = "Project Base for Vaadin", shortName = "Project Base", enableInstallPrompt = false)
 @CssImport("./styles/shared-styles.css")
@@ -32,16 +38,20 @@ import org.vaadin.example.service.HelloWorldService;
 public class MainView extends VerticalLayout {
 
     private static final String CENTERED_HEADER_CONTENT = "centered-header-content";
+    private static final String CENTERED_CONTENT = "centered-content";
 
     private HelloWorldService helloWorldService;// hello service
     private GreetService greetService;
+    private ProductLineService productLineService;
+    private ProductService productService;
 
     @Inject
-    public MainView(HelloWorldService service, GreetService greetService) {
+    public MainView(HelloWorldService service, GreetService greetService, ProductLineService productLineService,
+            ProductService productService) {
         this.helloWorldService = service;
         this.greetService = greetService;
-
-        // addClassName("centered-content");
+        this.productLineService = productLineService;
+        this.productService = productService;
 
         add(header(), mainBody(), footer());
 
@@ -70,8 +80,9 @@ public class MainView extends VerticalLayout {
 
     /**
      * 
+     * @return
      */
-    private Div mainBody() {
+    private Div mainButtonBody() {
         final Div view = new Div();
 
         // Use TextField for standard text input
@@ -92,16 +103,48 @@ public class MainView extends VerticalLayout {
 
         // Use custom CSS classes to apply styling. This is defined in
         // shared-styles.css.
-        view.addClassName("centered-content");
+        view.addClassName(CENTERED_CONTENT);
+
+        return view;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    private Div productLineSection() {
+        final Div view = new Div();
+        view.addClassName(CENTERED_HEADER_CONTENT);
+
+        final Div productLineDescription = new Div();
+
+        Grid<Product> grid = new Grid<>(Product.class);
+        grid.setColumns("productName", "productVendor", "productDescription", "productCode", "quantityInStock");
 
         final ComboBox<String> productLinesCB = new ComboBox<>();
-        productLinesCB.setItems("Classic Cars", "Motorcycles", "Planes", "Ships", "Trains", "Trucks and Buses",
-                "Vintage Cars");
+        productLinesCB.setItems(productLineService.productLines());
         productLinesCB.setLabel("Product Lines");
-        productLinesCB.addValueChangeListener(l -> Notification.show(l.getValue()));
+        productLinesCB.addValueChangeListener(l -> {
+            ProductLineDetail pld = productLineService.productLineDetail(l.getValue());
+            productLineDescription.setText(pld.textDescription);
+            List<Product> products = productService.findAllByProductLine(pld.getProductLine());
+            grid.setItems(products);
+            products.stream().forEach(p -> System.out.println(p.toString()));
+            Notification.show(pld.toString());
+        });
 
-        view.add(productLinesCB);
+        view.add(productLinesCB, productLineDescription, grid);
 
+        return view;
+    }
+
+    /**
+     * 
+     */
+    private Div mainBody() {
+        final Div view = new Div();
+        view.add(mainButtonBody(), productLineSection());
+        view.addClassName(CENTERED_HEADER_CONTENT);
         return view;
     }
 
